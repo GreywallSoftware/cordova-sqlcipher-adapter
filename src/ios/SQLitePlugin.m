@@ -11,11 +11,6 @@
 #import "sqlite3.h"
 
 #import "PSPDFThreadSafeMutableDictionary.h"
-
-// FUTURE TBD (in another version branch):
-//#define READ_BLOB_AS_BASE64
-
-// XXX TODO GONE:
 #define READ_BLOB_AS_BASE64
 #define INCLUDE_SQL_BLOB_BINDING
 // Defines Macro to only log lines when in DEBUG mode
@@ -487,27 +482,16 @@
         } else {
             stringArg = [arg description]; // convert to text
         }
-#ifdef INCLUDE_SQL_BLOB_BINDING // TBD subjet to change:
-        // If the string is a sqlblob URI then decode it and store the binary directly.
-        //
-        // A sqlblob URI is formatted similar to a data URI which makes it easy to convert:
-        //   sqlblob:[<mime type>][;charset=<charset>][;base64],<encoded data>
-        //
-        // The reason the `sqlblob` prefix is used instead of `data` is because
-        // applications may want to use data URI strings directly, so the
-        // `sqlblob` prefix disambiguates the desired behavior.
-        if ([stringArg hasPrefix:@"sqlblob:"]) {
-            // convert to data URI, decode, store as blob
-            stringArg = [stringArg stringByReplacingCharactersInRange:NSMakeRange(0,7) withString:@"data"];
-            NSData *data = [NSData dataWithContentsOfURL: [NSURL URLWithString:stringArg]];
-            bindResult = sqlite3_bind_blob(statement, argIndex, data.bytes, data.length, SQLITE_TRANSIENT);
-        }
-        else
-#endif
+        #ifdef INCLUDE_SQL_BLOB_BINDING
+        if([stringArg hasPrefix:@"sqlblob:"]){
+            
+        } else
+        #endif
         {
         // always bind text string as UTF-8 (sqlite does internal conversion if necessary):
         NSData *data = [stringArg dataUsingEncoding:NSUTF8StringEncoding];
-        bindResult = sqlite3_bind_text(statement, argIndex, data.bytes, (int)data.length, SQLITE_TRANSIENT);
+       	bindResult = sqlite3_bind_text(statement, argIndex, data.bytes, (int)data.length, SQLITE_TRANSIENT);	        
+        }       
     }
 
     return bindResult;
