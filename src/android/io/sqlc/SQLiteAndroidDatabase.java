@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import java.io.File;
-
+import android.util.Base64;
 import java.lang.IllegalArgumentException;
 import java.lang.Number;
 
@@ -427,6 +427,9 @@ class SQLiteAndroidDatabase
             case Cursor.FIELD_TYPE_FLOAT:
                 row.put(key, cur.getDouble(i));
                 break;
+            case Cursor.FIELD_TYPE_BLOB:
+                row.put(key, new String(Base64.encode(cur.getBlob(i), Base64.DEFAULT)));
+                break;    
             case Cursor.FIELD_TYPE_STRING:
             default: /* (BLOB) */
                 row.put(key, cur.getString(i));
